@@ -74,7 +74,7 @@ return [
     "search_options"                 => "Opciones de búsqueda",
     "searched_for"                   => "Buscado por",
     "software_short"                 => "OSPOS",
-    "software_title"                 => "Punto de Venta de Código Abierto (Open Source Point of Sale)",
+    "software_title"                 => "Punto de Venta de Código Abierto (DOT.CO POS)",
     "state"                          => "Estado",
     "submit"                         => "Enviar",
     "total_spent"                    => "Total Gastado",

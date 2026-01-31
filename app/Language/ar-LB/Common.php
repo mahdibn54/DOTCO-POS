@@ -84,6 +84,6 @@ return [
     "welcome"                        => "مرحباً",
     "welcome_message"                => "مرحباً فى OSPOS برجاء إختيار أى قسم للبدء.",
     "yes"                            => "",
-    "you_are_using_ospos"            => "أنت تستخدم إصدار Open Source Point Of Sale",
+    "you_are_using_ospos"            => "أنت تستخدم إصدار DOT.CO POS",
     "zip"                            => "الرقم البريدى",
 ];

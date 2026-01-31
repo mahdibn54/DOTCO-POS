@@ -84,6 +84,6 @@ return [
     "welcome"                        => "Vítejte",
     "welcome_message"                => "Vítejte v OSPOS, vyberte si z modulů dole pro pokračování.",
     "yes"                            => "",
-    "you_are_using_ospos"            => "Používáte Open Source Point Of Sale verze",
+    "you_are_using_ospos"            => "Používáte DOT.CO POS verze",
     "zip"                            => "PSČ",
 ];

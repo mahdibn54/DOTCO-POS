@@ -84,6 +84,6 @@ return [
     "welcome"                        => "Καλωσήρθατε",
     "welcome_message"                => "Καλωσορίσατε στο OSPOS, επιλέξτε μια από τις παρακάτω ενότητες για να ξεκινήσετε.",
     "yes"                            => "",
-    "you_are_using_ospos"            => "Χρησιμοποιείτε την Open Source Point Of Sale έκδοση",
+    "you_are_using_ospos"            => "Χρησιμοποιείτε την DOT.CO POS έκδοση",
     "zip"                            => "Ταχ.Κωδικας",
 ];

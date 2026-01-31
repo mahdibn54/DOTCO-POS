@@ -22,6 +22,7 @@ use App\Models\Tokens\Token_customer;
 use App\Models\Tokens\Token_invoice_sequence;
 use Config\Services;
 use Config\OSPOS;
+use Exception;
 use ReflectionException;
 use stdClass;
 
@@ -41,6 +42,7 @@ class Sales extends Secure_Controller
     private Item_kit $item_kit;
     private Sale $sale;
     private Stock_location $stock_location;
+    private Inventory $inventory;
     private array $config;
 
     public function __construct()
@@ -63,6 +65,7 @@ class Sales extends Secure_Controller
         $this->customer_rewards = model(Customer_rewards::class);
         $this->dinner_table = model(Dinner_table::class);
         $this->employee = model(Employee::class);
+        $this->inventory = model(Inventory::class);
     }
 
     /**
@@ -1788,5 +1791,217 @@ class Sales extends Secure_Controller
         }
 
         return null;
+    }
+
+    /**
+     * Shows the sales CSV import form. Used in sales management.
+     *
+     * @return void
+     * @noinspection PhpUnused
+     */
+    public function getCsvImport(): void
+    {
+        echo view('sales/form_csv_import');
+    }
+
+    /**
+     * Generates and downloads the sales CSV import template.
+     *
+     * @return void
+     * @noinspection PhpUnused
+     */
+    public function getGenerateCsvFile(): void
+    {
+        $csv_content = pack('CCC', 0xef, 0xbb, 0xbf); // UTF-8 BOM
+        $csv_content .= 'Date et Heure,Ticket #,Détail de la commande,Total (TND)' . PHP_EOL;
+        $csv_content .= '29/01/2026 07:07:43,1,"1x 123, 1x 456",5' . PHP_EOL;
+
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="sales_import_template.csv"');
+        header('Content-Length: ' . strlen($csv_content));
+
+        echo $csv_content;
+        exit;
+    }
+
+    /**
+     * Imports sales from CSV formatted file.
+     *
+     * @return void
+     * @noinspection PhpUnused
+     */
+    public function postImportCsvFile(): void
+    {
+        helper('importfile_helper');
+        try {
+            if ($_FILES['file_path']['error'] !== UPLOAD_ERR_OK) {
+                echo json_encode(['success' => false, 'message' => lang('Sales.csv_import_failed')]);
+            } else {
+                if (file_exists($_FILES['file_path']['tmp_name'])) {
+                    set_time_limit(240);
+
+                    $failCodes = [];
+                    $csv_rows = get_csv_file($_FILES['file_path']['tmp_name']);
+                    $employee_id = $this->employee->get_logged_in_employee_info()->person_id;
+                    $allowed_stock_locations = $this->stock_location->get_allowed_locations();
+
+                    $db = db_connect();
+                    $db->transBegin();
+
+                    foreach ($csv_rows as $key => $row) {
+                        $is_failed_row = false;
+
+                        // Parse sale date and time (format: DD/MM/YYYY HH:MM:SS)
+                        $sale_date_time = !empty($row['Date et Heure']) ? $row['Date et Heure'] : date('d/m/Y H:i:s');
+                        $sale_id_csv = !empty($row['Ticket #']) ? (int)$row['Ticket #'] : null;
+                        $order_details = !empty($row['Détail de la commande']) ? $row['Détail de la commande'] : '';
+                        $total_price = !empty($row['Total (TND)']) ? (float)str_replace(',', '.', $row['Total (TND)']) : 0;
+
+                        // Convert date format from DD/MM/YYYY to YYYY-MM-DD
+                        $date_parts = explode(' ', $sale_date_time);
+                        if (count($date_parts) >= 2) {
+                            $date_part = $date_parts[0];
+                            $time_part = $date_parts[1];
+                            $date_components = explode('/', $date_part);
+                            if (count($date_components) == 3) {
+                                $sale_date = $date_components[2] . '-' . $date_components[1] . '-' . $date_components[0];
+                                $sale_datetime = $sale_date . ' ' . $time_part;
+                            } else {
+                                $sale_datetime = date('Y-m-d H:i:s');
+                            }
+                        } else {
+                            $sale_datetime = date('Y-m-d H:i:s');
+                        }
+
+                        // Parse order details to extract items and quantities
+                        // Format: "1x 123, 2x 456" (item IDs) OR "1x Americano, 2x Latte" (item names)
+                        $items = [];
+                        if (!empty($order_details)) {
+                            $item_parts = preg_split('/,\s*/', $order_details);
+                            foreach ($item_parts as $item_part) {
+                                preg_match('/(\d+)x\s*(.+)/', trim($item_part), $matches);
+                                if (count($matches) == 3) {
+                                    $quantity = (int)$matches[1];
+                                    $item_identifier = trim($matches[2]);
+                                    // Check if it's a numeric ID or a name
+                                    $is_id = is_numeric($item_identifier);
+                                    $items[] = ['identifier' => $item_identifier, 'quantity' => $quantity, 'is_id' => $is_id];
+                                }
+                            }
+                        }
+                        // Calculate unit price for each item (distribute total evenly)
+                        $total_quantity = array_sum(array_column($items, 'quantity'));
+                        $unit_price = $total_quantity > 0 ? $total_price / $total_quantity : 0;
+
+                        // Find location
+                        $location_id = null;
+                        if (count($allowed_stock_locations) > 0) {
+                            $location_id = array_key_first($allowed_stock_locations);
+                        }
+
+                        // Insert into ospos_sales
+                        $sale_data = [
+                            'sale_time' => $sale_datetime,
+                            'customer_id' => null,
+                            'employee_id' => $employee_id,
+                            'comment' => 'Imported from CSV - Ticket #' . $sale_id_csv,
+                            'sale_status' => COMPLETED,
+                        ];
+
+                        $sale_id = $this->sale->insert($sale_data);
+
+                        if ($sale_id) {
+                            // Insert items for this sale
+                            foreach ($items as $item) {
+                                $item_identifier = $item['identifier'];
+                                $quantity = $item['quantity'];
+                                $is_id = $item['is_id'];
+
+                                // Find item by ID or name
+                                $item_obj = null;
+                                if ($is_id) {
+                                    // Look up by ID
+                                    $item_obj = $db->table('items')->where('item_id', $item_identifier)->limit(1)->get()->getRow();
+                                } else {
+                                    // Look up by name
+                                    $item_obj = $db->table('items')->where('name', $item_identifier)->limit(1)->get()->getRow();
+                                }
+                                if ($item_obj) {
+                                    $item_id = $item_obj->item_id;
+
+                                    // Insert into ospos_sales_items
+                                    $sales_items_data = [
+                                        'sale_id' => $sale_id,
+                                        'item_id' => $item_id,
+                                        'description' => '',
+                                        'serialnumber' => '',
+                                        'line' => 1,
+                                        'quantity_purchased' => $quantity,
+                                        'item_cost_price' => 0,
+                                        'item_unit_price' => $unit_price,
+                                        'discount' => 0,
+                                        'discount_type' => 'PERCENT',
+                                        'item_location' => $location_id,
+                                        'print_option' => '0',
+                                    ];
+
+                                    $db->table('sales_items')->insert($sales_items_data);
+
+                                    // Insert into ospos_inventory
+                                    $inventory_data = [
+                                        'trans_items' => $item_id,
+                                        'trans_user' => $employee_id,
+                                        'trans_comment' => 'Imported from CSV - Ticket #' . $sale_id_csv,
+                                        'trans_location' => $location_id,
+                                        'trans_inventory' => -$quantity,
+                                    ];
+                                    
+                                    $this->inventory->insert($inventory_data, false);
+                                } else {
+                                    // Item not found, log error
+                                    $lookup_type = $is_id ? 'ID' : 'name';
+                                    log_message('error', "CSV Sales import: Item not found by {$lookup_type}: '{$item_identifier}' for Ticket #{$sale_id_csv}");
+                                }
+                            }
+
+                            // Insert payment
+                            $sales_payments_data = [
+                                'sale_id' => $sale_id,
+                                'payment_type' => 'Cash',
+                                'payment_amount' => $total_price,
+                            ];
+
+                            $db->table('sales_payments')->insert($sales_payments_data);
+                        } else {
+                            $is_failed_row = true;
+                            log_message('error', "CSV Sales import failed on line " . ($key + 2) . ": Could not create sale for Ticket #{$sale_id_csv}.");
+                        }
+
+                        if ($is_failed_row) {
+                            $failed_row = $key + 2;
+                            $failCodes[] = $failed_row;
+                        }
+
+                        unset($csv_rows[$key]);
+                    }
+
+                    $csv_rows = null;
+
+                    if (count($failCodes) > 0) {
+                        $message = lang('Sales.csv_import_partially_failed', [count($failCodes), implode(', ', $failCodes)]);
+                        $db->transRollback();
+                        echo json_encode(['success' => false, 'message' => $message]);
+                    } else {
+                        $db->transCommit();
+                        echo json_encode(['success' => true, 'message' => lang('Sales.csv_import_success')]);
+                    }
+                } else {
+                    echo json_encode(['success' => false, 'message' => lang('Sales.csv_import_nodata_wrongformat')]);
+                }
+            }
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+            return;
+        }
     }
 }

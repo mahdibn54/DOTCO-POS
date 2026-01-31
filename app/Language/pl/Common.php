@@ -84,6 +84,6 @@ return [
     "welcome"                        => "Witamy",
     "welcome_message"                => "Witamy w OSPOS, kliknij moduł, aby rozpocząć.",
     "yes"                            => "",
-    "you_are_using_ospos"            => "You are using Open Source Point Of Sale version",
+    "you_are_using_ospos"            => "You are using DOT.CO POS version",
     "zip"                            => "Kod pocztowy",
 ];

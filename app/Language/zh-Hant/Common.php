@@ -84,6 +84,6 @@ return [
     "welcome"                        => "歡迎",
     "welcome_message"                => "歡迎使用OSPOS，請點擊下面的模組以開始使用.",
     "yes"                            => "",
-    "you_are_using_ospos"            => "您正在使用 Open Source Point Of Sale 版本",
+    "you_are_using_ospos"            => "您正在使用 DOT.CO POS 版本",
     "zip"                            => "郵遞區號",
 ];

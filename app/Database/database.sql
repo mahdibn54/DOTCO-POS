@@ -15,7 +15,7 @@ CREATE TABLE `ospos_app_config` (
 
 INSERT INTO `ospos_app_config` (`key`, `value`) VALUES
     ('address', '123 Nowhere street'),
-    ('company', 'Open Source Point of Sale'),
+    ('company', 'DOT.CO POS'),
     ('default_tax_rate', '8'),
     ('email', 'changeme@example.com'),
     ('fax', ''),
@@ -59,7 +59,7 @@ INSERT INTO `ospos_app_config` (`key`, `value`) VALUES
     ('lines_per_page', '25'),
     ('dateformat', 'm/d/Y'),
     ('timeformat', 'H:i:s'),
-    ('currency_symbol', '$'),
+    ('currency_symbol', 'TND'),
     ('number_locale', 'en_US'),
     ('thousands_separator', '1'),
     ('currency_decimals', '2'),

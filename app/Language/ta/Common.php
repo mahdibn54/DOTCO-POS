@@ -74,7 +74,7 @@ return [
     "search_options"                 => "தேடல் விருப்பங்கள்",
     "searched_for"                   => "தேடியது",
     "software_short"                 => "OSPOS",
-    "software_title"                 => "Open Source Point of Sale",
+    "software_title"                 => "DOT.CO POS",
     "state"                          => "மாநிலம்",
     "submit"                         => "சமர்ப்பிக்கவும்",
     "total_spent"                    => "மொத்த செலவு",

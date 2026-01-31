@@ -1,0 +1,6 @@
+Sale ID,Sale Date,Sale Time,Customer Name,Customer Phone,Customer Email,"Item Name",Quantity,"Unit Price",Discount,Payment Type,Payment Amount,Employee Name,Location
+,2025-01-15,08:30,John Doe,555-123-4567,john@example.com,Espresso,1,2.5,0,Cash,2.5,Admin,Stock
+,2025-01-15,09:15,Jane Smith,555-987-6543,jane@example.com,Latte,2,3.0,0,Credit Card,6.0,Admin,Stock
+,2025-01-15,10:00,John Doe,555-123-4567,john@example.com,Croissant,1,2.0,0,Cash,2.0,Admin,Stock
+,2025-01-16,14:30,Ahmed Ben Ali,555-111-2222,ahmed@example.com,Matcha latte,1,15.0,0,Cash,15.0,Admin,Stock
+,2025-01-16,15:00,Fatima Mansouri,555-333-4444,fatima@example.com,Croissant Nature,2,2.0,0,Credit Card,4.0,Admin,Stock

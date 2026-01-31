@@ -84,6 +84,6 @@ return [
     'welcome' => "Selamat Datang",
     'welcome_message' => "Selamat Datang di OSPOS, klik modul di bawah ini untuk memulai.",
     'yes' => "Iya",
-    'you_are_using_ospos' => "Anda menggunakan Open Source Point Of Sale Versi",
+    'you_are_using_ospos' => "Anda menggunakan DOT.CO POS Versi",
     'zip' => "Kode POS",
 ];

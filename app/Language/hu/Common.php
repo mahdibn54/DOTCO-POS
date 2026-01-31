@@ -84,6 +84,6 @@ return [
     "welcome"                        => "Üdvözlet",
     "welcome_message"                => "Üdvözli az OSPOS, kattintson a modulokra a kezdéshez!",
     "yes"                            => "",
-    "you_are_using_ospos"            => "Ön az Open Source Point Of Sale alábbi verzióját használja",
+    "you_are_using_ospos"            => "Ön az DOT.CO POS alábbi verzióját használja",
     "zip"                            => "Ir.Szám",
 ];

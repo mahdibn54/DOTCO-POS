@@ -84,6 +84,6 @@ return [
     "welcome"                        => "Dobrodošli",
     "welcome_message"                => "Dobrodošli u blagajnu otvorenog koda(OSPOS)",
     "yes"                            => "",
-    "you_are_using_ospos"            => "Koristite blagajnu otvorenog koda (Open Source Point Of Sale) verziju",
+    "you_are_using_ospos"            => "Koristite blagajnu otvorenog koda (DOT.CO POS) verziju",
     "zip"                            => "Broj pošte",
 ];

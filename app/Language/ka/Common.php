@@ -74,7 +74,7 @@ return [
     "search_options"                 => "ძებნის მორგება",
     "searched_for"                   => "ვეძებდი",
     "software_short"                 => "OSPOS",
-    "software_title"                 => "Open Source Point of Sale",
+    "software_title"                 => "DOT.CO POS",
     "state"                          => "შტატი",
     "submit"                         => "Submit",
     "total_spent"                    => "Total Spent",

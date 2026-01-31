@@ -61,6 +61,9 @@ ca<?php
 <?= view('partial/print_receipt', ['print_after_sale' => false, 'selected_printer' => 'takings_printer']) ?>
 
 <div id="title_bar" class="print_hide btn-toolbar">
+    <button class="btn btn-info btn-sm pull-right modal-dlg" data-btn-submit="<?= lang('Common.submit') ?>" data-href="<?= "$controller_name/csvImport" ?>" title="<?= lang('Sales.import_sales_csv') ?>">
+        <span class="glyphicon glyphicon-import">&nbsp;</span><?= lang('Common.import_csv') ?>
+    </button>
     <button onclick="javascript:printdoc()" class="btn btn-info btn-sm pull-right">
         <span class="glyphicon glyphicon-print">&nbsp;</span><?= lang('Common.print') ?>
     </button>

@@ -84,6 +84,6 @@ return [
     'welcome' => "Bem-vindo",
     'welcome_message' => "Bem-vindo.",
     'yes' => "sim",
-    'you_are_using_ospos' => "Você está usando Open Source Point Of Sale Versão",
+    'you_are_using_ospos' => "Você está usando DOT.CO POS Versão",
     'zip' => "CEP",
 ];
